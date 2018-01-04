@@ -1,6 +1,6 @@
 
 var myPeer = new Peer({key:'lwjd5qra8257b9'});
-
+// a new comment by Dimas
 $(document).ready(function(){
 $('#getID').on('click', function(){
 	alert('sd');
