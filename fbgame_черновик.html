@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+<script src='fbgame_черновик.js'></script>
+<link rel="stylesheet" href="fbgame.css">
+<style>
+    body{
+        text-align: center;
+    }
+    .flexContainer{
+        display: -webkit-flex;
+        display: -moz-flex;
+        display: -ms-flex;
+        display: -o-flex;
+        display: flex;
+        -webkit-flex-direction: row;
+        -moz-flex-direction: row;
+        -ms-flex-direction: row;
+        -o-flex-direction: row;
+        flex-direction: row-reverse;
+        margin-right: 5%;
+
+    }
+    h1{
+        font-size: 50px;
+        margin: 0.2em;
+    }
+    #chartField{
+        margin-left: 5%;
+    }
+    .fieldWrapper{
+    }
+    input{
+        display: block;
+    }
+</style>
+</head>
+<body>
+    <h1>Football game</h1>
+    <div class="flexContainer">
+        <div id="chartField">
+            <form id='connField'>
+                <input type='button' id = 'getID' name='getID' value = 'Get ID'></button>
+                <input type="text" id = 'writeID'>
+                <input type = 'button' id = 'connectToID' value = 'connectToID'></button>
+                <input type = 'button' id = 'sendMessage' value = 'sendMessage'></button>
+            </form>
+        </div>
+        <svg class='fieldWrapper' id='fieldWrapper' width='800' height='500' >
+            <rect id="field" x='25' y='25' width='740' height='450' style='fill:rgb(102, 255, 102); stroke-width:10; stroke:rgb(51, 51, 0)' rx='20' ry='20'>
+            </rect> 
+            <line x1='95' y1='30' x2='95' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='155' y1='30' x2='155' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='215' y1='30' x2='215' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='275' y1='30' x2='275' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='335' y1='30' x2='335' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='395' y1='30' x2='395' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='455' y1='30' x2='455' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='515' y1='30' x2='515' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='575' y1='30' x2='575' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='635' y1='30' x2='635' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='695' y1='30' x2='695' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
+            <line x1='395' y1='50' x2='395' y2='450' style='stroke:rgb(255, 255, 255); stroke-width:5';/>
+            <circle cx='395' cy='250' r='75' stroke='white' stroke-width='5' style='fill:none'/>
+            <rect width='93' height='280' x='45' y='110' style='stroke-width:4; stroke:rgb(255,255,255); fill:none'></rect>
+            <rect width='93' height='280' x='652' y='110' style='stroke-width:4; stroke:rgb(255,255,255); fill:none'></rect>
+            <rect width='700' height='400' x='45' y='50' style='stroke-width:4; stroke:rgb(255,255,255); fill:none'></rect>
+            <!--ниже главные объекты-->
+            <circle id="ball" cx='400' cy='300' r='20' stroke='black' stroke-width='5' fill='white'></circle>
+            <rect id="goalkeeperLeft" width='10' height='50' x='90' y='185'  style='fill:rgb(0,0,0);'></rect>
+            <rect id="goalkeeperRight" width='10' height='50' x='690' y='285' style='fill:rgb(0,0,0);'></rect>
+            <polyline id="goalLeft" points="80,150 45,150 45,350 80,350" style="stroke:rgb(255,0,0); fill:rgb(102, 255, 102); stroke-width:7" />
+            <polyline id="goalRight" points="710,150 745,150 745,350 710,350" style="stroke:rgb(255,0,0); fill:rgb(102, 255, 102); stroke-width:7" />
+        </svg>
+    </div>
+</body>
+</html>
