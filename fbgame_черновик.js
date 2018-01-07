@@ -4,26 +4,28 @@ $(function(){
   var lowerLimit = 390;
   $(document).on('keydown', function(e){
     e.preventDefault();
-      let replacement = $('#goalkeeperLeft').attr('x');
-    if(e.keyCode === 38){
+      let replacement = $('#goalkeeperLeft').attr('y');
+      console.log(replacement);
+    if(e.keyCode === 38){ // up
       console.log(e.keyCode + ' - is pressed');//надо заменитть на доступ к значению по оси Х
       //по отношению к вратарю
       if( replacement > upperLimit){
-        replacement++;
+        replacement--;
       }
+       $('#goalkeeperLeft').attr('y',replacement);
       //функция передающая перемещиение в чат
       //функция задающая перемещение вратаря
-    }else if(e.keyCode === 40){
+    }else if(e.keyCode === 40){ // down
       console.log(e.keyCode + ' - is pressed')
-      let replacement = 0;
+      //let replacement = 0;
       if( lowerLimit > replacement){
-        replacement--;
+        replacement++;
       }//else do nothing
-      $('#goalkeeperLeft').attr('x',replacement);
+      $('#goalkeeperLeft').attr('y',replacement);
       //функция передающая перемещиение в чат
       //функция задающая перемещение вратаря
     }
-    
+
   })
 })
 
