@@ -1,39 +1,10 @@
 'use strict';
 $(function(){
-  var upperLimit = 110;
-  var lowerLimit = 390;
-  $(document).on('keydown', function(e){
-    e.preventDefault();
-      let replacement = $('#goalkeeperLeft').attr('y');
-      console.log(replacement);
-    if(e.keyCode === 38){ // up
-      console.log(e.keyCode + ' - is pressed');//надо заменитть на доступ к значению по оси Х
-      //по отношению к вратарю
-      if( replacement > upperLimit){
-        replacement--;
-      }
-       $('#goalkeeperLeft').attr('y',replacement);
-      //функция передающая перемещиение в чат
-      //функция задающая перемещение вратаря
-    }else if(e.keyCode === 40){ // down
-      console.log(e.keyCode + ' - is pressed')
-      //let replacement = 0;
-      if( lowerLimit > replacement){
-        replacement++;
-      }//else do nothing
-      $('#goalkeeperLeft').attr('y',replacement);
-      //функция передающая перемещиение в чат
-      //функция задающая перемещение вратаря
-    }
-
-  })
-})
-
-/*$(function(){
 
       var myPeer; // peer object
       var conn; // connection stored
-
+      var User;
+      var Opponent;
       // click event listener - click will create new peer (host)!
       $('#getID').on('click', function(){
 
@@ -45,6 +16,7 @@ $(function(){
         });
         //  IMPORTANT: Here we are deal with incoming connection
         //             from remote peer (guest)!!!
+
         myPeer.on('connection', function(connection) {
           // IMPORTANT to handle recieved connection
           // after this assignment we can use .send() method for our HOST!
@@ -53,10 +25,17 @@ $(function(){
 
           // Here set listener for incoming messages
           conn.on('data', function(data){
-            console.log('Recieved - ' + data);
+            if (data.type){
+              moveOpponent(data.pos);
+            }else{
+              console.log('Recieved - ' + data);
+            }
           });
-        });//P2P FUNCTION
 
+
+        });//P2P FUNCTION
+        User = '#goalkeeperLeft';
+        Opponent = '#goalkeeperRight';
     });
 
     // click event listener - click will connect
@@ -83,9 +62,14 @@ $(function(){
 
       // Here we listening for incoming messages
       conn.on('data', function(data){
-        console.log('Recieved - ' + data);
+        if (data.type){
+            moveOpponent(data.pos);
+        }else{
+            console.log('Recieved - ' + data);
+        }
       });
-
+      User = '#goalkeeperRight';
+      Opponent = '#goalkeeperLeft';
     });
 
     // Send message function
@@ -93,5 +77,50 @@ $(function(){
         // here conn - our HOST or GUEST connection
         conn.send(prompt('Enter your message: '));
     });
+
+// ************** GAME ***********************
+
+  var upperLimit = 110;
+  var lowerLimit = 340;
+  $(document).on('keydown', function(e){
+    e.preventDefault();
+    if (!User){
+      alert('You need to create or join game first!');
+      return;
+    }
+
+      let replacement = $(User).attr('y');
+
+    if(e.keyCode === 38){ // up
+      //надо заменитть на доступ к значению по оси Х
+      //по отношению к вратарю
+      if( replacement > upperLimit){
+        replacement--;
+        sendMovement(replacement);
+      }
+       $(User).attr('y',replacement);
+      //функция передающая перемещиение в чат
+      //функция задающая перемещение вратаря
+    }else if(e.keyCode === 40){ // down
+      //let replacement = 0;
+      if( lowerLimit > replacement){
+
+        replacement++;
+        sendMovement(replacement);
+      }//else do nothing
+      $(User).attr('y',replacement);
+      //функция передающая перемещиение в чат
+      //функция задающая перемещение вратаря
+    }
+
+  })
+
+  function sendMovement(position){
+      conn.send({type: 'movement', pos: position});
+  };
+
+  function moveOpponent(posY){
+      $(Opponent).attr('y',posY);
+  };
 
 }); // ready brackets*/
