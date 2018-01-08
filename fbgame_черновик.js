@@ -123,4 +123,29 @@ $(function(){
       $(Opponent).attr('y',posY);
   };
 
+var ball = $('#ball');
+var canvas = $('#field');
+var W = 740;
+var H = 450;
+var ballRadius = ball.attr('r');
+var x = ball.attr('cx')-10;
+var y = ball.attr('cy')-10;
+var dx = 2;
+var dy = -2;
+
+function moveBall() {
+
+    if(x + dx > W-ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+    if(y + dy > H-ballRadius || y + dy < ballRadius) {
+        dy = -dy;
+    }
+    x += dx;
+    y += dy;
+    ball.attr('cx',x);
+    ball.attr('cy',y);
+}
+setInterval(moveBall, 10);
+
 }); // ready brackets*/
