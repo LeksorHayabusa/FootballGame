@@ -199,17 +199,22 @@ function collapsBallKeeper(){
           keeper.attr('y', keepY++);
         }
   }
-  function isBallOut(){
-    if( fieldX + Width <= x || x <= fieldX){
-      console.log('ball is out!');
-      dx = 1;
-      dy = 1;
-      ball.attr('cx', );
-      ball.attr('cy', );
+  function isBallOutOrGoal(){
+    if( ( 160 <= x || x <= 340 ) && (y <= 70)){
+          console.log('THE GOAL!');
     }
+      else if( fieldX + Width <= x || x <= fieldX){
+          console.log('ball is out!');
+          dx = 1;
+          dy = 1;
+          //x = 120;
+          //y = 100;
+          //ball.attr('cx', 120);
+          //ball.attr('cy', 100);
+      }
   }
   setInterval(function(){
         moveKeeper();
-        isBallOut();
+        isBallOutOrGoal();
         moveBall();}, 10);
 }); // ready brackets*/
