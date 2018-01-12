@@ -123,11 +123,16 @@ $(function(){
   };
 */
 //я изменил только ниже!!!!!!!!!!!!!!!!!!!!!!!
-var keeper = $('#goalkeeperLeft');
-var keepY = +(keeper.attr('y'));
-var keepX = +(keeper.attr('x'));
-var keepHeight = +(keeper.attr('height'));
-var keepWidth = +(keeper.attr('width'));
+var leftKeeper = $('#goalkeeperLeft'); 
+var leftKeepY = +(leftKeeper.attr('y'));
+var leftKeepX = +(leftKeeper.attr('x'));
+var testRightKeeper = $('#goalkeeperRight'); 
+var testRightKeepY = +(testRightKeeper.attr('y'));
+var testRightKeepX = +(testRightKeeper.attr('x'));
+var testRightKeepHeight = +(testRightKeeper.attr('height'));
+var testRightKeepWidth = +(testRightKeeper.attr('width'));
+var keepHeight = +(leftKeeper.attr('height'));
+var keepWidth = +(leftKeeper.attr('width'));
 var ball = $('#ball');
 var field = $('#field');
 var Width = +(field.attr('width'));
@@ -152,12 +157,20 @@ function moveBall() {
     ball.attr('cx', x);
     ball.attr('cy', y);
     collapsBallKeeper();
+    collapsTESTBallKeeper()
     
 }
 function collapsBallKeeper(){
-  if (x-ballRadius === keepX + keepWidth){
-    if ( keepY <= y+ballRadius && y-ballRadius < keepY + keepHeight){
-      console.log('keeper catches');
+  if (x-ballRadius === leftKeepX + keepWidth){
+    if ( leftKeepY <= y+ballRadius && y-ballRadius < leftKeepY + keepHeight){
+      console.log('leftKeeper catches');
+      dx = -dx;} 
+  }
+}
+function collapsTESTBallKeeper(){
+  if (x+ballRadius === testRightKeepX){
+    if ( testRightKeepY <= y+ballRadius && y-ballRadius < testRightKeepY + keepHeight){
+      console.log('rightKeeper catches');
       dx = -dx;} 
   }
 }
@@ -173,7 +186,9 @@ function collapsBallKeeper(){
   var topLimit = 68;
   var bottomLimit = 22 + Height;
   var upPressed = false;
+  var rightPressed = false;
   var downPressed = false;
+  var leftPressed = false;
 
  $(document).on('keydown', function(e){
     if(e.keyCode === 38){ 
@@ -181,8 +196,17 @@ function collapsBallKeeper(){
     }else if(e.keyCode === 40){ // down
       //let replacement = 0;
       downPressed = true;
+    } 
+    // beneath - just for test
+    else if(e.keyCode === 39){ // down
+      //let replacement = 0;
+      rightPressed = true;
     }
-  }  ); 
+    else if(e.keyCode === 37){ // down
+      //let replacement = 0;
+      leftPressed = true;
+    }
+  }); 
  $(document).on('keyup', function(e){
     if(e.keyCode === 38){ 
       upPressed =  false;
@@ -190,31 +214,47 @@ function collapsBallKeeper(){
       //let replacement = 0;
       downPressed = false;
     }
+    // beneath - just for test
+    else if(e.keyCode === 39){ // down
+      //let replacement = 0;
+      rightPressed = false;
+    }
+    else if(e.keyCode === 37){ // down
+      //let replacement = 0;
+      leftPressed = false;
+    }
   }); 
 
   function moveKeeper(){
-        if(upPressed && keepY > topLimit){
-          keeper.attr('y', keepY--);
-        } else if(downPressed && bottomLimit > keepY){
-          keeper.attr('y', keepY++);
+        if(upPressed && leftKeepY > topLimit){
+          leftKeeper.attr('y', leftKeepY-=2);
+        } else if(downPressed && bottomLimit > leftKeepY){
+          leftKeeper.attr('y', leftKeepY+=2);
+        }
+  }
+  function moveTESTKeeper(){
+        if(leftPressed && testRightKeepY > topLimit){
+          testRightKeeper.attr('y', testRightKeepY-=2);
+        } else if(rightPressed && bottomLimit > testRightKeepY){
+          testRightKeeper.attr('y', testRightKeepY+=2);
         }
   }
   function isBallOutOrGoal(){
-    if( ( 160 <= x || x <= 340 ) && (y <= 70)){
-          console.log('THE GOAL!');
+    if( (180 <= y && y <= 330) && ( x ===65 || x === fieldX+ Width)){
+      // в правой стороне уровениния все верно
+         alert('GOAL!');
+          ball.attr('cx', x = 390);
+          ball.attr('cy', y = 290);
     }
       else if( fieldX + Width <= x || x <= fieldX){
           console.log('ball is out!');
-          dx = 1;
-          dy = 1;
-          //x = 120;
-          //y = 100;
-          //ball.attr('cx', 120);
-          //ball.attr('cy', 100);
+          ball.attr('cx', x = 390);
+          ball.attr('cy', y = 290);
       }
   }
   setInterval(function(){
         moveKeeper();
+        moveTESTKeeper();
         isBallOutOrGoal();
         moveBall();}, 10);
 }); // ready brackets*/
