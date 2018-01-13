@@ -112,7 +112,7 @@ $(function(){
       //функция передающая перемещиение в чат
       //функция задающая перемещение вратаря
     }
-    
+
   }*/
   /*function sendMovement(position){
       conn.send({type: 'movement', pos: position});
@@ -123,10 +123,10 @@ $(function(){
   };
 */
 //я изменил только ниже!!!!!!!!!!!!!!!!!!!!!!!
-var leftKeeper = $('#goalkeeperLeft'); 
+var leftKeeper = $('#goalkeeperLeft');
 var leftKeepY = +(leftKeeper.attr('y'));
 var leftKeepX = +(leftKeeper.attr('x'));
-var testRightKeeper = $('#goalkeeperRight'); 
+var testRightKeeper = $('#goalkeeperRight');
 var testRightKeepY = +(testRightKeeper.attr('y'));
 var testRightKeepX = +(testRightKeeper.attr('x'));
 var testRightKeepHeight = +(testRightKeeper.attr('height'));
@@ -156,20 +156,20 @@ function moveBall() {
     y += dy;
     ball.attr('cx', x);
     ball.attr('cy', y);
-    
+
 }
 function collapsBallKeeper(){
   if (x-ballRadius === leftKeepX + keepWidth){
     if ( leftKeepY <= y+ballRadius && y-ballRadius < leftKeepY + keepHeight){
       console.log('leftKeeper catches');
-      dx = -dx;} 
+      dx = -dx;}
   }
 }
 function collapsTESTBallKeeper(){
   if (x+ballRadius === testRightKeepX){
     if ( testRightKeepY <= y+ballRadius && y-ballRadius < testRightKeepY + keepHeight){
       console.log('rightKeeper catches');
-      dx = -dx;} 
+      dx = -dx;}
   }
 }
 /*function ballOut(){
@@ -193,12 +193,12 @@ function collapsTESTBallKeeper(){
 //event below listens to pushing a button
  $(document).on('keydown', function(e){
   e.preventDefault();
-    if(e.keyCode === 38){ 
+    if(e.keyCode === 38){
       upPressed =  true;
     }else if(e.keyCode === 40){ // down
       //let replacement = 0;
       downPressed = true;
-    } 
+    }
     // beneath - just for test
     else if(e.keyCode === 39){ // down
       //let replacement = 0;
@@ -208,12 +208,12 @@ function collapsTESTBallKeeper(){
       //let replacement = 0;
       leftPressed = true;
     }
-  }); 
+  });
 
  //event below listens to releasing a button
  $(document).on('keyup', function(e){
   e.preventDefault();
-    if(e.keyCode === 38){ 
+    if(e.keyCode === 38){
       upPressed =  false;
     }else if(e.keyCode === 40){ // down
       //let replacement = 0;
@@ -228,7 +228,7 @@ function collapsTESTBallKeeper(){
       //let replacement = 0;
       leftPressed = false;
     }
-  }); 
+  });
 
   function moveKeeper(){
         if(upPressed && leftKeepY > topLimit){
@@ -253,7 +253,7 @@ function collapsTESTBallKeeper(){
           if (x===65){
             countL = leftCounter()
             $('#leftGoalPlate').text(countL);
-          } else if (x===fieldX 
+          } else if (x===fieldX
             + Width){
             countR = rightCounter()
             $('#rightGoalPlate').text(countR);}
@@ -279,19 +279,22 @@ function collapsTESTBallKeeper(){
 
 $('#startGame').on('click',function(){
 
-  while (countL <=3 || countR <= 3){
-    setInterval(function(){
+  //while (countL <=3 || countR <= 3){
+  var myInterval = setInterval(function(){
       moveKeeper();
       moveTESTKeeper();
       isBallOutOrGoal();
       moveBall();
       collapsBallKeeper();
       collapsTESTBallKeeper()
+      if (countL >=3 || countR >= 3){
+        alert('the game is ended');
+        clearInterval(myInterval);
+      }
     }, 10);
-  }
-    alert('the game is ended')
-});
-  
-  
+  //}
+  });
+
+
 
 }); // ready brackets
