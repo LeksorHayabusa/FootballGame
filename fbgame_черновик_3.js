@@ -301,7 +301,7 @@ $('#startGame').on('click',function startGame(){
       alert('game over');
       isGameStarted = false;
       if (!isGameStarted){     //turns the startGame button on
-        $('#startGame').on('click', startGame());
+        $('#startGame').on('click', startGame);
       }
     }
    }, 10);
