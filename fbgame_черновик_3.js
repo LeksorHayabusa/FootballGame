@@ -122,7 +122,6 @@ $(function(){
       $(Opponent).attr('y',posY);
   };
 */
-//я изменил только ниже!!!!!!!!!!!!!!!!!!!!!!!
 var leftKeeper = $('#goalkeeperLeft');
 var leftKeepY = +(leftKeeper.attr('y'));
 var leftKeepX = +(leftKeeper.attr('x'));
@@ -159,14 +158,14 @@ function moveBall() {
 
 }
 function collapsBallKeeper(){
-  if (x-ballRadius === leftKeepX + keepWidth){
+  if (x-ballRadius <= leftKeepX + keepWidth){
     if ( leftKeepY <= y+ballRadius && y-ballRadius < leftKeepY + keepHeight){
       console.log('leftKeeper catches');
       dx = -dx;}
   }
 }
 function collapsTESTBallKeeper(){
-  if (x+ballRadius === testRightKeepX){
+  if (x+ballRadius >= testRightKeepX){
     if ( testRightKeepY <= y+ballRadius && y-ballRadius < testRightKeepY + keepHeight){
       console.log('rightKeeper catches');
       dx = -dx;}
@@ -237,7 +236,7 @@ function collapsTESTBallKeeper(){
           leftKeeper.attr('y', leftKeepY+=2);
         }
   }
-  function moveTESTKeeper(){
+  function moveTESTKeeper(){ //test function to interchange second player
         if(leftPressed && testRightKeepY > topLimit){
           testRightKeeper.attr('y', testRightKeepY-=2);
         } else if(rightPressed && bottomLimit > testRightKeepY){
@@ -246,12 +245,12 @@ function collapsTESTBallKeeper(){
   }
   //defines whether out or goal happened
   function isBallOutOrGoal(){
-    if( (180 <= y && y <= 330) && ( x ===65 || x === fieldX+ Width)){
+    if( (180 <= y && y <= 330) && ( x <=65 || x >= fieldX+ Width)){
          console.log('GOAL!');
-          if (x===65){
+          if (x<=65){
             countL = leftCounter();
             $('#leftGoalPlate').text(countL);
-          } else if (x===fieldX
+          } else if (x>=fieldX
             + Width){
             countR = rightCounter();
             $('#rightGoalPlate').text(countR);}
@@ -274,37 +273,67 @@ function collapsTESTBallKeeper(){
     }
   };
 
-//this part sets the game up
+  function timeoutSetting(i,msDelay){ //count down timer for dialog window
+    setTimeout(function (){
+    countDownCircle.text(i);
+    }, msDelay)
+  }
+function countDown(){ //execution of dialog window and game run
+  countDownCircle[0].showModal();
+    let msDelay = 0;
+    for (var i =3;  i>1; i--){
+      msDelay += 1000;
+      timeoutSetting(i,msDelay);
+    }
+    if (i === 1 ){
+      i = 'GO!'
+      msDelay = 3000;
+      timeoutSetting(i,msDelay);
+      msDelay = 4000;
+      setTimeout(function(){
+      countDownCircle[0].close();
+      gameRun();
+      },msDelay)
+    }
+}
+  function gameRun(){ //execution game methods
+      var gameInterval= setInterval(function(){
+        moveKeeper();
+        moveTESTKeeper();
+        isBallOutOrGoal();
+        moveBall();
+        collapsBallKeeper();
+        collapsTESTBallKeeper()
+    
+        //clear goal count
+        if (countL >=3 || countR >= 3){
+          clearInterval(gameInterval);
+          alert('game over');
+          isGameStarted = false;
+          if (!isGameStarted){     //turns the startGame button on
+            $('#startGame').on('click', startGame);
+          }
+        }
+       }, 20);
+      return gameInterval; 
+  }
+
+      //this part sets the game up
 var countL = 0; //-goal counter for left player
 var countR = 0; //-goal counter for right player
 var isGameStarted = false;
+var countDownCircle = $("#countDownCircle");
 $('#startGame').on('click',function startGame(){
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
     $(this).off('click');
   }
-  countL = 1; //-goal counter for left player
-  countR = 1;
+  countDown();//count down and game run
+  $('#leftGoalPlate').text(0); //-goal counter for left player
+  $('#rightGoalPlate').text(0);
   leftCounter = goalCounter();
   rightCounter = goalCounter();
-  //countL = leftCounter.currentCounter;
-  //countR = rightCounter.currentCounter;
-  var gameInterval = setInterval(function(){
-    moveKeeper();
-    moveTESTKeeper();
-    isBallOutOrGoal();
-    moveBall();
-    collapsBallKeeper();
-    collapsTESTBallKeeper()
-    if (countL >=3 || countR >= 3){
-      clearInterval(gameInterval);
-      alert('game over');
-      isGameStarted = false;
-      if (!isGameStarted){     //turns the startGame button on
-        $('#startGame').on('click', startGame);
-      }
-    }
-   }, 10);
+
 })
 
 }); // ready brackets
