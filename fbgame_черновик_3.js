@@ -186,8 +186,8 @@ function collapsTESTBallKeeper(){
   var rightPressed = false; //-test button
   var downPressed = false;
   var leftPressed = false;//-test button
-  var leftCounter = goalCounter(); // who missed the goal
-  var rightCounter = goalCounter();// who missed the goal
+  var currentLeftCounter = 0;
+  var currentRightCounter = 0;
 
 //event below listens to pushing a button
  $(document).on('keydown', function(e){
@@ -248,12 +248,12 @@ function collapsTESTBallKeeper(){
     if( (180 <= y && y <= 330) && ( x <=65 || x >= fieldX+ Width)){
          console.log('GOAL!');
           if (x<=65){
-            countL = leftCounter();
-            $('#leftGoalPlate').text(countL);
+            ++currentLeftCounter;
+            $('#leftGoalPlate').text(currentLeftCounter);
           } else if (x>=fieldX
             + Width){
-            countR = rightCounter();
-            $('#rightGoalPlate').text(countR);}
+            ++currentRightCounter;
+            $('#rightGoalPlate').text(currentRightCounter);}
           ball.attr('cx', x = 395);
           ball.attr('cy', y = 255);
           dx = -dx;
@@ -266,18 +266,12 @@ function collapsTESTBallKeeper(){
           dx = -dx;
       }
   }
-  function goalCounter(){
-    let currentCounter = 1;
-    return function(){
-      return currentCounter++;
-    }
-  };
 
-  function timeoutSetting(i,msDelay){ //count down timer for dialog window
-    setTimeout(function (){
-    countDownCircle.text(i);
-    }, msDelay)
-  }
+function timeoutSetting(i,msDelay){ //count down timer for dialog window
+  var num = setTimeout(function (){
+  countDownCircle.text(i);
+  }, msDelay);
+}
 function countDown(){ //execution of dialog window and game run
   countDownCircle[0].showModal();
     let msDelay = 0;
@@ -306,34 +300,36 @@ function countDown(){ //execution of dialog window and game run
         collapsTESTBallKeeper()
     
         //clear goal count
-        if (countL >=3 || countR >= 3){
+        if (currentLeftCounter >=3 || currentRightCounter >= 3){
           clearInterval(gameInterval);
-          alert('game over');
+          gameOverWindow[0].showModal();
           isGameStarted = false;
           if (!isGameStarted){     //turns the startGame button on
             $('#startGame').on('click', startGame);
+            gameOverWindow[0].close();
           }
         }
-       }, 20);
+       }, 10);
       return gameInterval; 
   }
 
-      //this part sets the game up
-var countL = 0; //-goal counter for left player
-var countR = 0; //-goal counter for right player
-var isGameStarted = false;
-var countDownCircle = $("#countDownCircle");
-$('#startGame').on('click',function startGame(){
+function startGame(){
+        //this part sets the game up
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
     $(this).off('click');
   }
-  countDown();//count down and game run
   $('#leftGoalPlate').text(0); //-goal counter for left player
   $('#rightGoalPlate').text(0);
-  leftCounter = goalCounter();
-  rightCounter = goalCounter();
+  currentLeftCounter = 0;
+  currentRightCounter = 0;
+  countDown();//count down and game run
+}
 
-})
+var isGameStarted = false;
+var countDownCircle = $("#countDownCircle");
+const gameOverWindow = $('#gameOverWindow');
+//the main execution listener!
+$('#startGame').on('click', startGame);
 
 }); // ready brackets
