@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <title>Document</title>
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
 <script src='fbgame_черновик_3.js'></script>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/dark-hive/jquery-ui.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="fbgame.css">
 <style>
     body{
@@ -31,7 +34,7 @@
     }
     #chartField{
         margin-left: 5%;
-        display: none;
+        display: block;
 
     }
     .fieldWrapper{
@@ -78,6 +81,12 @@
         border-radius: 3px;
         line-height: 2.5em;
     }
+    .ui-button.ui-corner-all.ui-widget.ui-button-icon-only.ui-dialog-titlebar-close {
+        display: none;
+    }
+    .ui-dialog .ui-dialog-title {
+        float:none;
+    }
 </style>
 </head>
 <body>
@@ -91,7 +100,7 @@
             </div>
             <svg class='fieldWrapper' id='fieldWrapper' width='800' height='500' >
                 <rect x='25' y='25' width='740' height='450' style='fill:rgb(102, 255, 102); stroke-width:10; stroke:rgb(51, 51, 0)' rx='20' ry='20'>
-                </rect> 
+                </rect>
                 <line x1='95' y1='30' x2='95' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
                 <line x1='155' y1='30' x2='155' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
                 <line x1='215' y1='30' x2='215' y2='470' style='stroke:rgb(0, 204, 102); stroke-width:30';/>
@@ -117,15 +126,41 @@
                 <circle id="ball" cx='395' cy='255' r='20' stroke='black' stroke-width='5' fill='white'></circle>
             </svg>
         </div>
-        
+
         <div id="chartField">
             <form id='connField'>
-                <input type='button' id = 'getID' name='getID' value = 'Get ID'></button>
-                <input type="text" id = 'writeID'>
-                <input type = 'button' id = 'connectToID' value = 'connectToID'></button>
-                <input type = 'button' id = 'sendMessage' value = 'sendMessage'></button>
+                <input type='button' id = 'getID' name='getID' class="ui-button ui-corner-all ui-widget" value = 'Start new game' style="float:left;">
+                <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-lg fa-fw"></i></span>
+                <input type="text" id = 'writeID' style="clear:both">
+                <input type = 'button' id = 'connectToID' class="ui-button ui-corner-all ui-widget" value = 'Connect to game'>
+                <input type = 'button' id = 'sendMessage' value = 'sendMessage'>
+                <input type = 'button' id = 'dialog' value = 'Dialog'>
             </form>
         </div>
+    </div>
+
+
+    <div id="dialog-start" title="Start new P2P game">
+      <span>The code below is for connecting to this game</span>
+      <span style="color:white; font-size: 10px;">Click on the code for copy to clipboard</span>
+      <form>
+        <fieldset>
+          <label id="code" style="cursor:pointer;"></label>
+        </fieldset><input id = 'clipboard' type="text" style="position:absolute; top:-1000px">
+        <div class="load-icon-big" style="color:#0094FFFF; margin-top: 20px;"><div><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div><div>Waiting for connection of second player...</div><span style="color:white; font-size: 10px;">Message will disappear when the second player will confirm ready status</span></div>
+
+      </form>
+    </div>
+
+    <div id="dialog-connect" title="Start new P2P game">
+      <span>For connection to game insert the code below</span>
+
+      <form>
+        <fieldset>
+          <input type="text" id="insert-code" style="width: 100%">
+        </fieldset>
+        <div id="load-connection" class="load-icon-big" hidden="hidden" style="color:#0094FFFF; margin-top: 20px;"><div><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div><div>Sending connection request...</div><span style="color:white; font-size: 10px;">Message will disappear when the second player will confirm ready status</span></div>
+      </form>
     </div>
 </body>
 </html>
