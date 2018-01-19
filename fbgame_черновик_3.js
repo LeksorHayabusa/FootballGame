@@ -268,6 +268,7 @@ $(function(){
       $(Opponent).attr('y',posY);
   };
 */
+<<<<<<< HEAD
 //я изменил только ниже!!!!!!!!!!!!!!!!!!!!!!!
 
 //
@@ -278,6 +279,18 @@ function initPlayer(){
   keepWidth = +(User.attr('width'));
 }
 
+=======
+var leftKeeper = $('#goalkeeperLeft');
+var leftKeepY = +(leftKeeper.attr('y'));
+var leftKeepX = +(leftKeeper.attr('x'));
+var testRightKeeper = $('#goalkeeperRight');
+var testRightKeepY = +(testRightKeeper.attr('y'));
+var testRightKeepX = +(testRightKeeper.attr('x'));
+var testRightKeepHeight = +(testRightKeeper.attr('height'));
+var testRightKeepWidth = +(testRightKeeper.attr('width'));
+var keepHeight = +(leftKeeper.attr('height'));
+var keepWidth = +(leftKeeper.attr('width'));
+>>>>>>> f82d145215ce3105f838e892e75490c40e7483d2
 var ball = $('#ball');
 var field = $('#field');
 var Width = +(field.attr('width'));
@@ -324,6 +337,7 @@ function moveBall() {
     Opponent.attr('x', OpponentKeepX);
     Opponent.attr('y', OpponentKeepY);
 }
+<<<<<<< HEAD
 
 // Function for goalkeeper touches the ball
 function collapsBallKeeper(leftSide, rightSide, flag){
@@ -337,6 +351,28 @@ function collapsBallKeeper(leftSide, rightSide, flag){
         console.log('Opponent catches');
         dx = -dx;
       }
+=======
+function collapsBallKeeper(){
+  if (x-ballRadius <= leftKeepX + keepWidth){
+    if ( leftKeepY <= y+ballRadius && y-ballRadius < leftKeepY + keepHeight){
+      console.log('leftKeeper catches');
+      dx = -dx;}
+  }
+}
+function collapsTESTBallKeeper(){
+  if (x+ballRadius >= testRightKeepX){
+    if ( testRightKeepY <= y+ballRadius && y-ballRadius < testRightKeepY + keepHeight){
+      console.log('rightKeeper catches');
+      dx = -dx;}
+  }
+}
+/*function ballOut(){
+  if(x-ballRadius === keepX){
+    alert('the ball is out of field');
+    setInterval(function(){
+      moveKeeper();
+      moveBall(); }, 10);
+>>>>>>> f82d145215ce3105f838e892e75490c40e7483d2
     }
 }
 
@@ -347,8 +383,8 @@ function collapsBallKeeper(leftSide, rightSide, flag){
   var rightPressed = false; //-test button
   var downPressed = false;
   var leftPressed = false;//-test button
-  var leftCounter = goalCounter(); // who missed the goal
-  var rightCounter = goalCounter();// who missed the goal
+  var currentLeftCounter = 0;
+  var currentRightCounter = 0;
 
 //event below listens to pushing a button
  $(document).on('keydown', function(e){
@@ -392,10 +428,24 @@ function collapsBallKeeper(leftSide, rightSide, flag){
 
 // ONE FUNCTION FOR MOVE GOALKEEPER
   function moveKeeper(){
+<<<<<<< HEAD
         if(upPressed && UserKeepY > topLimit){
           User.attr('y', UserKeepY-=2);
         } else if(downPressed && bottomLimit > UserKeepY){
           User.attr('y', UserKeepY+=2);
+=======
+        if(upPressed && leftKeepY > topLimit){
+          leftKeeper.attr('y', leftKeepY-=2);
+        } else if(downPressed && bottomLimit > leftKeepY){
+          leftKeeper.attr('y', leftKeepY+=2);
+        }
+  }
+  function moveTESTKeeper(){ //test function to interchange second player
+        if(leftPressed && testRightKeepY > topLimit){
+          testRightKeeper.attr('y', testRightKeepY-=2);
+        } else if(rightPressed && bottomLimit > testRightKeepY){
+          testRightKeeper.attr('y', testRightKeepY+=2);
+>>>>>>> f82d145215ce3105f838e892e75490c40e7483d2
         }
       //conn.send({type:'moveBall', posOpponentX: UserKeepX, posOpponentY: UserKeepY});
   }
@@ -408,8 +458,9 @@ function collapsBallKeeper(leftSide, rightSide, flag){
   // }
   //defines whether out or goal happened
   function isBallOutOrGoal(){
-    if( (180 <= y && y <= 330) && ( x ===65 || x === fieldX+ Width)){
+    if( (180 <= y && y <= 330) && ( x <=65 || x >= fieldX+ Width)){
          console.log('GOAL!');
+<<<<<<< HEAD
           if (x===65){
             countR = rightCounter();
             $('#rightGoalPlate').text(countR);
@@ -420,6 +471,15 @@ function collapsBallKeeper(leftSide, rightSide, flag){
             $('#leftGoalPlate').text(countL);
             conn.send({type:"goal", gate: '#leftGoalPlate'});
           }
+=======
+          if (x<=65){
+            ++currentLeftCounter;
+            $('#leftGoalPlate').text(currentLeftCounter);
+          } else if (x>=fieldX
+            + Width){
+            ++currentRightCounter;
+            $('#rightGoalPlate').text(currentRightCounter);}
+>>>>>>> f82d145215ce3105f838e892e75490c40e7483d2
           ball.attr('cx', x = 395);
           ball.attr('cy', y = 255);
           dx = -dx;
@@ -432,22 +492,60 @@ function collapsBallKeeper(leftSide, rightSide, flag){
           dx = -dx;
       }
   }
-  function goalCounter(){
-    let currentCounter = 1;
-    return function(){
-      return currentCounter++;
-    }
-  };
 
-//this part sets the game up
-var countL = 0; //-goal counter for left player
-var countR = 0; //-goal counter for right player
-var isGameStarted = false;
-$('#startGame').on('click',function startGame(){
+function timeoutSetting(i,msDelay){ //count down timer for dialog window
+  var num = setTimeout(function (){
+  countDownCircle.text(i);
+  }, msDelay);
+}
+function countDown(){ //execution of dialog window and game run
+  countDownCircle[0].showModal();
+    let msDelay = 0;
+    for (var i =3;  i>1; i--){
+      msDelay += 1000;
+      timeoutSetting(i,msDelay);
+    }
+    if (i === 1 ){
+      i = 'GO!'
+      msDelay = 3000;
+      timeoutSetting(i,msDelay);
+      msDelay = 4000;
+      setTimeout(function(){
+      countDownCircle[0].close();
+      gameRun();
+      },msDelay)
+    }
+}
+  function gameRun(){ //execution game methods
+      var gameInterval= setInterval(function(){
+        moveKeeper();
+        moveTESTKeeper();
+        isBallOutOrGoal();
+        moveBall();
+        collapsBallKeeper();
+        collapsTESTBallKeeper()
+    
+        //clear goal count
+        if (currentLeftCounter >=3 || currentRightCounter >= 3){
+          clearInterval(gameInterval);
+          gameOverWindow[0].showModal();
+          isGameStarted = false;
+          if (!isGameStarted){     //turns the startGame button on
+            $('#startGame').on('click', startGame);
+            gameOverWindow[0].close();
+          }
+        }
+       }, 10);
+      return gameInterval; 
+  }
+
+function startGame(){
+        //this part sets the game up
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
     $(this).off('click');
   }
+<<<<<<< HEAD
   countL = goalCounter(); //-goal counter for left player
   countR = goalCounter();
   leftCounter = goalCounter();
@@ -476,5 +574,19 @@ $('#startGame').on('click',function startGame(){
     }
    }, 10);
 })
+=======
+  $('#leftGoalPlate').text(0); //-goal counter for left player
+  $('#rightGoalPlate').text(0);
+  currentLeftCounter = 0;
+  currentRightCounter = 0;
+  countDown();//count down and game run
+}
+
+var isGameStarted = false;
+var countDownCircle = $("#countDownCircle");
+const gameOverWindow = $('#gameOverWindow');
+//the main execution listener!
+$('#startGame').on('click', startGame);
+>>>>>>> f82d145215ce3105f838e892e75490c40e7483d2
 
 }); // ready brackets
