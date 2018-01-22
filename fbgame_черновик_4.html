@@ -56,7 +56,10 @@
                 <input type='button' id = 'getID' name='getID' class="ui-button ui-corner-all ui-widget" value = 'Start new game' style="float:left;">
                 <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-lg fa-fw"></i></span>
                 <input type = 'button' id = 'connectToID' class="ui-button ui-corner-all ui-widget" value = 'Connect to game'>
-                <input class="chat-btn" type = 'button' id = 'sendMessage' value = 'sendMessage'>
+                <input class='ui-button ui-corner-all ui-widget' type='button' value="Close connection">
+            </form>
+            <form id="chat_form">
+                <input class="chat-btn" type = 'submit' id = 'sendMessage' value = 'sendMessage'>
                 <input class="chat-outcoming-message" type = 'text' id = 'chat-sent-message' placeholder = 'Write you message here'>
             </form>
             <div id="chatScreen">

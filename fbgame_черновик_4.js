@@ -219,23 +219,32 @@ $(function(){
         }else if(data.type==='Ready'){
             appendStatus(0, 1);
         }else if(data.type === 'restart'){
-          if(data.isRestart === true){
+          if(data.isRestartAnswer === null){
             restartRequest();
+          } else if(data.isRestartAnswer === true){
+            startGame();
           } else if(data.isRestartAnswer === false){
             alert('Your opponent denied your proposal')
           }
-        } else{
-            showInChatScreen(true, data);
+        } else if(data.type === 'chat'){
+            showInChatScreen(true, data.msg);
+        } else {
+          console.log('received undefined: '+ data);
         }
       });
     } // END CONNECT FUNC
 
     // Send message function
-$('#sendMessage').on('submit', function(event){
-  preventDefault(event);
-  // here conn - our HOST or GUEST connection
+$('#chat_form').on('keydown', function(event){
+  if (e.keydown === 13){
+    event.preventDefault();
+    sendMessage(event);
+  }
+});
+$('#sendMessage').on('submit', function sendMessage(event){
+  event.preventDefault();
   let chatSentMessage = $('chat-sent-message').text();
-  conn.send(chatSentMessage);
+  conn.send({type:chat, msg:chatSentMessage});
   showInChatScreen(false, chatSentMessage);
 });
 
@@ -243,8 +252,8 @@ $('#sendMessage').on('submit', function(event){
 function showInChatScreen(isReceived, message){
   let chatScreen = $('#chatScreen')
   if(isReceived){
-    chatScreen.append('<br><p class="received_message">' + message + '</p>');
-  } else { chatScreen.append('<br><p class="received_message">' + message + '</p>');}
+    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + message + '</div>');
+  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');}
 } 
 // ************** GAME PHISICS ***********************
 
@@ -410,7 +419,9 @@ const startGameButton = $('#startGame');
 const gameOverWindow = $('#gameOverWindow');
 $('#startGame').slideDown(500);
 
-$('#startGame').on('click',function startGame(){
+$('#startGame').on('click',startGame);
+
+  function startGame(){
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
     $(this).off('click');
@@ -437,17 +448,18 @@ $('#startGame').on('click',function startGame(){
       $('#startGame').slideToggle(500);
       if (!isGameStarted){     //turns the startGame button on
         $('#startGame').on('click', function(){
-            conn.send({type:'restart', isRestart: true});
+            conn.send({type:'restart', isRestartAnswer: null});
         })
         
       }
     }
    }, 10);
-})
+}
 
 function restartRequest(){
   let requestText = 'do you want to play again?'
   if(confirm(requestText)){
+    conn.send({type:'restart', isRestartAnswer:true})
     startGame();
   } else {
     conn.send({data:restart, isRestartAnswer: false})
