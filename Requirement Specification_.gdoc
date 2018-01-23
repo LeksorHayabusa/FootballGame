@@ -39,10 +39,11 @@ DEVELOPMENT ORDER
 в ст 63 изменить название на checkReadyStatus()
 в ст 380 изменить название функции на checkBallOutOrGoal
 
+
 Discovered BUGS:(What. What relates to. When happens. Consiquenses.)
 1.Interval goes on. Relates to default browser behaviour. In case we got started the game in one tab and we move to another tab, the interval timer stops and game becomes frozen. Consequenses: unknown
 2. The ball isnt transmited from the first to second player. The second player isnt transmited to the first player. When the game is running. Cons: missed goal count. the goal count counts every goal from second player, but doesnt get first's goals.
 3. 
 
 Helpers:
-Eman Zaghloul, doaa_shafik, Cédric F
+Eman Zaghloul, doaa_shafik, Cédric F, LepiDecko
