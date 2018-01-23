@@ -62,7 +62,7 @@ $(function(){
       var sheckStatus = 0;
       function appendStatus(dialog, flag1, flag2){
         if (dialog){
-          $(dialog).append("<div style='display:flex; justify-content:space-between; margin-top:10px;'>"+
+          $(dialog).append("<div id='startButton' style='display:flex; justify-content:space-between; margin-top:10px;'>"+
             "<div class='p1'>Player 1 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div>"+
             "<div class='p2'>Player 2 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div></div>");
         }else if (flag1){
@@ -83,6 +83,9 @@ $(function(){
           dialogStart.dialog( "close" );
           dialogConnect.dialog( "close" );
           $('#startGame').trigger('click');
+          sheckStatus = 0;
+          doubleCheckPrevent = 0;
+          $('.readyPlay').fadeIn('fast');
       }
 
       var myPeer; // peer object
@@ -112,6 +115,10 @@ $(function(){
           //  IMPORTANT: Here we are deal with incoming connection
           //             from remote peer (guest)!!!
           myPeer.on('connection', function(connection) {
+
+            // if check unautorised connection HERE MUST BE
+
+
             $('#dialog-start').find('.load-icon-big').last()
             .html('<span>Connection established.<br/>To start game click button below</span>');
             if (doubleCheckPrevent === 0){
@@ -138,6 +145,8 @@ $(function(){
                 OpponentKeepX = data.posOpponentX;
               }else if(data.type==='Ready'){
                 appendStatus(0, 0);
+              }else if (data.type==='chat') {
+                showInChatScreen(true, data.msg);
               }else{
                 console.log('Recieved - ' + data);
               }
@@ -235,26 +244,28 @@ $(function(){
     } // END CONNECT FUNC
 
     // Send message function
-$('#chat_form').on('keydown', function(event){
-  if (e.keydown === 13){
-    event.preventDefault();
-    sendMessage(event);
-  }
-});
-$('#sendMessage').on('submit', function sendMessage(event){
-  event.preventDefault();
-  let chatSentMessage = $('chat-sent-message').text();
-  conn.send({type:chat, msg:chatSentMessage});
-  showInChatScreen(false, chatSentMessage);
-});
+
+        $('#chat-sent-message').on('keypress', function(e){
+          if (e.which === 13){
+            e.preventDefault();
+            sendMessage($(e.target).val());
+            $(e.target).val('');
+          }
+    });
+
+
+function sendMessage(message){
+  conn.send({type:'chat', msg:message});
+  showInChatScreen(false, message);
+}
 
 ///   message render function
 function showInChatScreen(isReceived, message){
   let chatScreen = $('#chatScreen')
   if(isReceived){
-    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + message + '</div>');
-  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');}
-} 
+    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + Date.now() + message + '</div>');
+  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + Date.getTime() + message + '</div>');}
+}
 // ************** GAME PHISICS ***********************
 
 //
@@ -401,7 +412,7 @@ function collapsBallKeeper(leftSide, rightSide, flag){
           ball.attr('cy', y = 390);
           dx = -dx;
       }
-    // check 
+    // check
     let isUserWon = true;
     if(leftGoalPlate >=3 || rightGoalPlate >=3){
       if(leftGoalPlate < rightGoalPlate){
@@ -450,7 +461,7 @@ $('#startGame').on('click',startGame);
         $('#startGame').on('click', function(){
             conn.send({type:'restart', isRestartAnswer: null});
         })
-        
+
       }
     }
    }, 10);
