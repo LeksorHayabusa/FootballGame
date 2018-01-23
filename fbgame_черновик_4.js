@@ -263,8 +263,8 @@ function sendMessage(message){
 function showInChatScreen(isReceived, message){
   let chatScreen = $('#chatScreen')
   if(isReceived){
-    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + Date.now() + message + '</div>');
-  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + Date.getTime() + message + '</div>');}
+    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + message + '</div>');
+  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');}
 }
 // ************** GAME PHISICS ***********************
 
