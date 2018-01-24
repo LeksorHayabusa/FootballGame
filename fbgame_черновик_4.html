@@ -10,14 +10,40 @@
 <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/dark-hive/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="fbgame_черновик_4.css">
-<link href="https://fonts.googleapis.com/css?family=Squada+One" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=Faster+One" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Squada+One|Faster+One|PT+Sans" rel="stylesheet">
 </head>
 <body>
     <h1>Football game</h1>
     <div class="flexContainer">
+        <div class="mainButtons">
+            <form id='connField'>
+                <input type='button' id = 'getID' name='getID' class="ui-button ui-corner-all ui-widget" value = 'Start new game' style="float:left;">
+                <input type = 'button' id = 'connectToID' class="ui-button ui-corner-all ui-widget" value = 'Connect to game'>
+                <input class='ui-button ui-corner-all ui-widget' type='button' value="Close connection">
+            </form>
+            <div class="loading">
+                <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-lg fa-fw"></i></span>
+            </div>
+            <div id="chartField">
+            <form id="chat_form" autocomplete="off">
+                <span>Chat Box:</span>
+                <input class="chat-outcoming-message" type = 'text' id = 'chat-sent-message' placeholder = 'Write you message here'>
+                <input type='button' id = 'send' name='getID' class="ui-button ui-corner-all ui-widget" value = 'Send' style="float:left;">
+            </form>
+            <div id="chatScreen">
+                <p class="chat-service-message"></p>
+            </div>
+        </div>
         <div class='centralContainer'>
-            <button id="startGame">Start again?</button>
+            <div id="gameOverLayer">
+                <p><span>GAME OVER</span>
+                    <button id="startGame" class="ui-button ui-corner-all ui-widget">Send request to play again</button>
+                </p>
+
+            </div>
+                <div id="goal">
+                    <p><span>GOAL!</span>
+                </div>
             <div class="countPlateContainer">
                 <div class="countPlate" id="leftGoalPlate">0</div>
                 <div class="countPlate" id="rightGoalPlate">0</div>
@@ -50,20 +76,6 @@
                 <circle id="ball" cx='395' cy='255' r='20' stroke='black' stroke-width='5' fill='white'></circle>
             </svg>
         </div>
-
-        <div id="chartField">
-            <form id='connField'>
-                <input type='button' id = 'getID' name='getID' class="ui-button ui-corner-all ui-widget" value = 'Start new game' style="float:left;">
-                <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-lg fa-fw"></i></span>
-                <input type = 'button' id = 'connectToID' class="ui-button ui-corner-all ui-widget" value = 'Connect to game'>
-                <input class='ui-button ui-corner-all ui-widget' type='button' value="Close connection">
-            </form>
-            <form id="chat_form">
-                <input class="chat-outcoming-message" type = 'text' id = 'chat-sent-message' placeholder = 'Write you message here'>
-            </form>
-            <div id="chatScreen">
-                <p class="chat-service-message">Conversation start</p>
-            </div>
         </div>
     </div>
 

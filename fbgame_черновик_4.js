@@ -147,6 +147,15 @@ $(function(){
                 appendStatus(0, 0);
               }else if (data.type==='chat') {
                 showInChatScreen(true, data.msg);
+              }else if(data.type === 'restart'){
+                if(data.isRestartAnswer === true){
+                  overlayShowHide(false);
+                  startGame();
+                }else if (data.isRestartAnswer === false){
+                  alert('Your opponent denied your proposal');
+                } else {
+                  restartRequest();
+                }
               }else{
                 console.log('Recieved - ' + data);
               }
@@ -218,22 +227,24 @@ $(function(){
           Opponent.attr('y', data.posOpponentY);
 
         }else if(data.type==='goal'){
+            $('#goal').fadeIn('slow');
+            showGoal();
             let score = $(data.gate).text();
              if (parseInt(score)){
                 $(data.gate).text(parseInt(score) + 1);
             } else {
                 $(data.gate).text('1');
             }
-
         }else if(data.type==='Ready'){
             appendStatus(0, 1);
         }else if(data.type === 'restart'){
-          if(data.isRestartAnswer === null){
-            restartRequest();
-          } else if(data.isRestartAnswer === true){
+          if (data.isRestartAnswer === true){
+            overlayShowHide(false);
             startGame();
           } else if(data.isRestartAnswer === false){
             alert('Your opponent denied your proposal')
+          } else {
+            restartRequest();
           }
         } else if(data.type === 'chat'){
             showInChatScreen(true, data.msg);
@@ -245,27 +256,61 @@ $(function(){
 
     // Send message function
 
-        $('#chat-sent-message').on('keypress', function(e){
+      $('#chat-sent-message').on('keypress', function(e){
           if (e.which === 13){
             e.preventDefault();
-            sendMessage($(e.target).val());
-            $(e.target).val('');
+            if ($(e.target).val() != ''){
+              sendMessage($(e.target).val());
+              $(e.target).val('');
+            } else{
+              showInChatScreen('error', 'Your message can\'t be empty!');
+            }
           }
-    });
-
+      });
+      $('#send').on('click', function(){
+        let text = $('#chat-sent-message').val();
+        if (text != ''){
+          sendMessage(text);
+          $('#chat-sent-message').val('');
+        } else{
+          showInChatScreen('error', 'Your message can\'t be empty!');
+        }
+      });
 
 function sendMessage(message){
-  conn.send({type:'chat', msg:message});
-  showInChatScreen(false, message);
+  try {
+    conn.send({type:'chat', msg:message});
+    showInChatScreen(false, message);
+  }catch(err) {
+    showInChatScreen('error', 'You need to establish connection first!');
+}
+
 }
 
 ///   message render function
 function showInChatScreen(isReceived, message){
   let chatScreen = $('#chatScreen')
-  if(isReceived){
+  if(isReceived===true){
     chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + message + '</div>');
-  } else { chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');}
+  } else if (isReceived===false){
+    chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');
+  } else {
+    chatScreen.append('<div class="error"><span class="error">Error: </span>' + message + '</div>');
+  }
+  autoScroll();
 }
+// scroll to  last message
+function autoScroll(){
+  var height = 0;
+  $('#chatScreen div').each(function(i, value){
+      height += parseInt($(this).height());
+  });
+  height += '';
+  $('#chatScreen').animate({scrollTop: height});
+}
+
+
+
 // ************** GAME PHISICS ***********************
 
 //
@@ -342,10 +387,8 @@ function collapsBallKeeper(leftSide, rightSide, flag){
   var topLimit = 68;  //goalkeeper move limits
   var bottomLimit = 22 + Height; //goalkeeper move limits
   var upPressed = false;
-  var rightPressed = false; //-test button
   var downPressed = false;
-  var leftPressed = false;//-test button
-  var currentLeftCounter = 0; //- left keeper goal counters
+  var currentLeftCounter = 0; //left keeper goal counters
   var currentRightCounter = 0;
 
 //event below listens to pushing a button
@@ -366,7 +409,6 @@ function collapsBallKeeper(leftSide, rightSide, flag){
     if(e.keyCode === 38){
       upPressed =  false;
     }else if(e.keyCode === 40){ // down
-      //let replacement = 0;
       downPressed = false;
     }
   });
@@ -378,19 +420,13 @@ function collapsBallKeeper(leftSide, rightSide, flag){
         } else if(downPressed && bottomLimit > UserKeepY){
           User.attr('y', UserKeepY+=2);
         }
-      //conn.send({type:'moveBall', posOpponentX: UserKeepX, posOpponentY: UserKeepY});
   }
-  // function moveTESTKeeper(){
-  //       if(leftPressed && OpponentKeepY > topLimit){
-  //         Opponent.attr('y', OpponentKeepY-=2);
-  //       } else if(rightPressed && bottomLimit > OpponentKeepY){
-  //         Opponent.attr('y', OpponentKeepY+=2);
-  //       }
-  // }
+
   //defines whether out or goal happened
   function isBallOutOrGoal(){
     if( (180 <= y && y <= 330) && ( x ===65 || x === fieldX+ Width)){
-         console.log('GOAL!');
+         $('#goal').fadeIn('slow');
+         showGoal();
           if (x===65){
             ++currentLeftCounter;
             $('#rightGoalPlate').text(currentLeftCounter);
@@ -421,6 +457,20 @@ function collapsBallKeeper(leftSide, rightSide, flag){
       winOrFailCongrads(isUserWon);
       }
     }
+// show goal function
+function showGoal(){
+  let w = 55;
+  let max = 100;
+  let goal = setInterval(function(){
+      if(w != max){
+        $('#goal p').css('font-size', w++);
+      } else {
+        clearInterval(goal);
+        $('#goal').fadeOut('fast');
+      }
+  }, 20);
+}
+
 
 // ************** SERVICE PART ***********************
 
@@ -428,15 +478,15 @@ function collapsBallKeeper(leftSide, rightSide, flag){
 var isGameStarted = false;
 const startGameButton = $('#startGame');
 const gameOverWindow = $('#gameOverWindow');
-$('#startGame').slideDown(500);
+overlayShowHide(false);
 
 $('#startGame').on('click',startGame);
 
   function startGame(){
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
-    $(this).off('click');
-    $(this).slideUp(500);
+    $('#startGame').off('click');
+    overlayShowHide(false);
   }
   $('#leftGoalPlate').text(0); //-goal counter for left player
   $('#rightGoalPlate').text(0);
@@ -453,13 +503,15 @@ $('#startGame').on('click',startGame);
     } else {
         conn.send({type:'moveBall', posOpponentX: UserKeepX, posOpponentY: UserKeepY});
     }
-    if ($('#leftGoalPlate').text() >=3 || $('#rightGoalPlate').text() >= 3){
+    if ($('#leftGoalPlate').text() >= 3 || $('#rightGoalPlate').text() >= 3){
       clearInterval(gameInterval);
       isGameStarted = false;
-      $('#startGame').slideToggle(500);
+      overlayShowHide(true);
       if (!isGameStarted){     //turns the startGame button on
         $('#startGame').on('click', function(){
-            conn.send({type:'restart', isRestartAnswer: null});
+            conn.send({type:'restart'});
+            $('#startGame').off('click');
+            //overlayShowHide(false);
         })
 
       }
@@ -467,13 +519,21 @@ $('#startGame').on('click',startGame);
    }, 10);
 }
 
+function overlayShowHide(isShow){
+    if (isShow){
+      $('#gameOverLayer').fadeIn();
+    }else{
+      $('#gameOverLayer').fadeOut();
+    }
+}
+
 function restartRequest(){
-  let requestText = 'do you want to play again?'
-  if(confirm(requestText)){
-    conn.send({type:'restart', isRestartAnswer:true})
+  if(confirm('Do you want to play again?')){
+    overlayShowHide(false);
+    conn.send({type:'restart', isRestartAnswer:true});
     startGame();
   } else {
-    conn.send({data:restart, isRestartAnswer: false})
+    conn.send({type:'restart', isRestartAnswer: false});
   }
 }
 
