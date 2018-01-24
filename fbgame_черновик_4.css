@@ -83,6 +83,12 @@ h1{
     flex-direction: row;
     justify-content: space-around;
 }
+.countPlateContainer > span{
+    line-height:35px;
+    height: 35px;
+    font-size: 22px;
+    text-transform: uppercase;
+}
 #gameOverLayer{
     position: absolute;
     width:100%;

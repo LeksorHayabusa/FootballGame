@@ -22,7 +22,7 @@
                 <input class='ui-button ui-corner-all ui-widget' type='button' value="Close connection">
             </form>
             <div class="loading">
-                <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-lg fa-fw"></i></span>
+                <span id="load-icon" hidden="hidden"><i class="fa fa-refresh fa-spin fa-3x fa-fw"></i></span>
             </div>
             <div id="chartField">
             <form id="chat_form" autocomplete="off">
@@ -45,8 +45,8 @@
                     <p><span>GOAL!</span>
                 </div>
             <div class="countPlateContainer">
-                <div class="countPlate" id="leftGoalPlate">0</div>
-                <div class="countPlate" id="rightGoalPlate">0</div>
+                <span>Player 1</span><div class="countPlate" id="leftGoalPlate">0</div>
+                <div class="countPlate" id="rightGoalPlate">0</div><span>Player 2</span>
             </div>
             <svg class='fieldWrapper' id='fieldWrapper' width='800' height='500' >
                 <rect x='25' y='25' width='740' height='450' style='fill:rgb(102, 255, 102); stroke-width:10; stroke:rgb(51, 51, 0)' rx='20' ry='20'>
@@ -80,7 +80,7 @@
     </div>
 
 
-    <div id="dialog-start" title="Start new P2P game">
+    <div id="dialog-start" title="Player 1 - new P2P game">
       <span>The code below is for connecting to this game</span>
       <span style="color:white; font-size: 10px;">Click on the code for copy to clipboard</span>
       <form>
@@ -92,7 +92,7 @@
       </form>
     </div>
 
-    <div id="dialog-connect" title="Start new P2P game">
+    <div id="dialog-connect" title="Player 2 - connect to the game">
       <span>For connection to game insert the code below</span>
 
       <form>
