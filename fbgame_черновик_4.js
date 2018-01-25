@@ -65,15 +65,13 @@ $(function(){
           $(dialog).append("<div id='startButton' style='display:flex; justify-content:space-between; margin-top:10px;'>"+
             "<div class='p1'>Player 1 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div>"+
             "<div class='p2'>Player 2 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div></div>");
-        }else if (flag1 && sheckStatus !=2){
+        }else if (flag1){
           $('.p1 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
           sheckStatus += 1;
 
         }else{
-          if (sheckStatus != 2){
             $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
             sheckStatus += 1;
-          }
         }
         if (sheckStatus === 2){
             // TIMEOUT BEFORE RUN GAME
@@ -221,21 +219,6 @@ $(function(){
             }
 
       });
-
-      conn.on('close', function(){
-        showInChatScreen('warning', 'Data connection lost! Trying to reconnect...');
-        let reconnectEvent = setInterval(function(){
-          if (conn.open){
-            clearInterval(reconnectEvent);
-            showInChatScreen('warning', 'Connected successful!');
-          } else {
-            showInChatScreen('warning', 'Data connection lost! Trying to reconnect...');
-            conn = myPeer.connect(otherPIR);
-            console.log('channel - ' + conn.dataChannel);
-          }
-        }, 10000);
-      });
-
 
       myPeer.on('error', function(err) {
             let error = err.type;
