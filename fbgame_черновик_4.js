@@ -14,6 +14,7 @@ $(function(){
       buttons: {
         Cancel: function() {
           dialogStart.dialog( "close" );
+          myPeer.destroy();
         }
       },
       close: false,
@@ -29,8 +30,6 @@ $(function(){
       modal: true,
       buttons: {
         "Connect to game": function(){
-          dialogConnect.dialog( "option", 'buttons.Cancel', {hide:false, disabled:true});
-          //dialogConnect.dialog( "option", 'buttons.Ready to game', {hide:false, disabled:true});
           $('#load-connection').removeAttr('hidden');
           $('#load-connection').html(connectEstablish);
           connectToPeer();
@@ -38,6 +37,7 @@ $(function(){
         ,
         Cancel: function() {
           dialogConnect.dialog( "close" );
+          myPeer.destroy();
         }
       },
       close: false,
@@ -65,12 +65,15 @@ $(function(){
           $(dialog).append("<div id='startButton' style='display:flex; justify-content:space-between; margin-top:10px;'>"+
             "<div class='p1'>Player 1 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div>"+
             "<div class='p2'>Player 2 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div></div>");
-        }else if (flag1){
+        }else if (flag1 && sheckStatus !=2){
           $('.p1 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
           sheckStatus += 1;
+
         }else{
-          $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
-          sheckStatus += 1;
+          if (sheckStatus != 2){
+            $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
+            sheckStatus += 1;
+          }
         }
         if (sheckStatus === 2){
             // TIMEOUT BEFORE RUN GAME
@@ -85,7 +88,9 @@ $(function(){
           $('#startGame').trigger('click');
           sheckStatus = 0;
           doubleCheckPrevent = 0;
-          $('.readyPlay').fadeIn('fast');
+          $('#getID').fadeOut('slow');
+          $('#connectToID').fadeOut('slow');
+          //$('.readyPlay').fadeIn('fast');
       }
 
       var myPeer; // peer object
@@ -128,9 +133,9 @@ $(function(){
               'ui-widget readyPlay">Start game</button></div>');
               appendStatus('#dialog-start');
               $('.readyPlay').on('click', function(){
-                $(this).fadeOut('fast');
+                //$(this).fadeOut('fast');
                 conn.send({type:'Ready'});
-                appendStatus(0, 1);
+
               });
               doubleCheckPrevent = 1;
             }
@@ -145,6 +150,9 @@ $(function(){
                 OpponentKeepX = data.posOpponentX;
               }else if(data.type==='Ready'){
                 appendStatus(0, 0);
+                conn.send({type:'ReadyAnswer'});
+              }else if(data.type==='ReadyAnswer'){
+                appendStatus(0, 1);
               }else if (data.type==='chat') {
                 showInChatScreen(true, data.msg);
               }else if(data.type === 'restart'){
@@ -152,6 +160,10 @@ $(function(){
                   overlayShowHide(false);
                   startGame();
                 }else if (data.isRestartAnswer === false){
+                  $('#startGame').on('click', function(){
+                    conn.send({type:'restart'});
+                    $('#startGame').off('click');
+                  });
                   alert('Your opponent denied your proposal');
                 } else {
                   restartRequest();
@@ -166,6 +178,8 @@ $(function(){
           initPlayer();
         }
     });
+
+
     $('#connectToID').on('click', function(){
         dialogConnect.dialog( "open" );
     });
@@ -189,6 +203,7 @@ $(function(){
       $('#startGame').trigger('click');
       // if connection established - send greeting
       conn.on('open', function(id) {
+
             $('#dialog-connect').find('.load-icon-big').last()
             .html('<span>Connection established.<br/>To start game click button below</span>');
             if (doubleCheckPrevent === 0){
@@ -198,14 +213,30 @@ $(function(){
               'ui-widget readyPlay">Start game</button></div>');
               appendStatus('#dialog-connect');
               $('.readyPlay').on('click', function(){
-                $(this).fadeOut('fast');
-                appendStatus(0, 0);
+                //$(this).fadeOut('fast');
                 conn.send({type:'Ready'});
+                //appendStatus(0, 0);
               });
               doubleCheckPrevent = 1;
             }
 
       });
+
+      conn.on('close', function(){
+        showInChatScreen('warning', 'Data connection lost! Trying to reconnect...');
+        let reconnectEvent = setInterval(function(){
+          if (conn.open){
+            clearInterval(reconnectEvent);
+            showInChatScreen('warning', 'Connected successful!');
+          } else {
+            showInChatScreen('warning', 'Data connection lost! Trying to reconnect...');
+            conn = myPeer.connect(otherPIR);
+            console.log('channel - ' + conn.dataChannel);
+          }
+        }, 10000);
+      });
+
+
       myPeer.on('error', function(err) {
             let error = err.type;
             if (error === 'peer-unavailable'){
@@ -237,12 +268,19 @@ $(function(){
             }
         }else if(data.type==='Ready'){
             appendStatus(0, 1);
+            conn.send({type:'ReadyAnswer'});
+        }else if(data.type==='ReadyAnswer'){
+            appendStatus(0, 0);
         }else if(data.type === 'restart'){
           if (data.isRestartAnswer === true){
             overlayShowHide(false);
             startGame();
           } else if(data.isRestartAnswer === false){
-            alert('Your opponent denied your proposal')
+            $('#startGame').on('click', function(){
+              conn.send({type:'restart'});
+              $('#startGame').off('click');
+            });
+            alert('Your opponent denied your proposal');
           } else {
             restartRequest();
           }
@@ -295,7 +333,7 @@ function showInChatScreen(isReceived, message){
   } else if (isReceived===false){
     chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');
   } else {
-    chatScreen.append('<div class="error"><span class="error">Error: </span>' + message + '</div>');
+    chatScreen.append('<div class="'+isReceived+'"><span class="'+isReceived+'">' + isReceived +': </span>' + message + '</div>');
   }
   autoScroll();
 }
@@ -308,7 +346,13 @@ function autoScroll(){
   height += '';
   $('#chatScreen').animate({scrollTop: height});
 }
-
+// destroy connection
+$('#destroy').on('click', function(){
+  if(typeof myPeer === 'object'){
+    myPeer.destroy();
+  }
+  location.reload();
+});
 
 
 // ************** GAME PHISICS ***********************
@@ -448,14 +492,6 @@ function collapsBallKeeper(leftSide, rightSide, flag){
           ball.attr('cy', y = 390);
           dx = -dx;
       }
-    // check
-    let isUserWon = true;
-    if(leftGoalPlate >=3 || rightGoalPlate >=3){
-      if(leftGoalPlate < rightGoalPlate){
-          isUserWon = false;
-        }
-      winOrFailCongrads(isUserWon);
-      }
     }
 // show goal function
 function showGoal(){
@@ -536,19 +572,5 @@ function restartRequest(){
     conn.send({type:'restart', isRestartAnswer: false});
   }
 }
-
-function winOrFailCongrads(condition){
-  let text = '';
-  if(condition){
-    text = 'Game Over\nCongrads! You won!';
-  } else {text = 'Game Over\nyou lose the game'}
-  gameOverWindow[0].showModal();
-  gameOverWindow.text(text);
-  $(document).on('click', function(){
-    gameOverWindow[0].close();
-    $(this).off('click');
-  })
-}
-
 
 }); // ready brackets
