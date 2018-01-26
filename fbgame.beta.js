@@ -1,5 +1,8 @@
 'use strict';
 $(function(){
+
+  // ************** CONNECTION SETTING UP ***********************
+
   var doubleCheckPrevent = 0;
   var dialogStart = $( "#dialog-start" ).dialog({
       autoOpen: false,
@@ -11,6 +14,7 @@ $(function(){
       buttons: {
         Cancel: function() {
           dialogStart.dialog( "close" );
+          myPeer.destroy();
         }
       },
       close: false,
@@ -26,8 +30,6 @@ $(function(){
       modal: true,
       buttons: {
         "Connect to game": function(){
-          dialogConnect.dialog( "option", 'buttons.Cancel', {hide:false, disabled:true});
-          //dialogConnect.dialog( "option", 'buttons.Ready to game', {hide:false, disabled:true});
           $('#load-connection').removeAttr('hidden');
           $('#load-connection').html(connectEstablish);
           connectToPeer();
@@ -35,6 +37,7 @@ $(function(){
         ,
         Cancel: function() {
           dialogConnect.dialog( "close" );
+          myPeer.destroy();
         }
       },
       close: false,
@@ -56,20 +59,25 @@ $(function(){
         window.clearTimeout();
       });
       // Player CHECK STATUS FUNC
-      var sheckStatus = 0;
+      var checkStatus = 0;
+      var checkFirst = 0;
+      var checkSecond = 0;
       function appendStatus(dialog, flag1, flag2){
         if (dialog){
-          $(dialog).append("<div style='display:flex; justify-content:space-between; margin-top:10px;'>"+
+          $(dialog).append("<div id='startButton' style='display:flex; justify-content:space-between; margin-top:10px;'>"+
             "<div class='p1'>Player 1 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div>"+
             "<div class='p2'>Player 2 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div></div>");
-        }else if (flag1){
+        }else if (flag1 && checkFirst < 1){
+          checkFirst = 1;
           $('.p1 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
-          sheckStatus += 1;
-        }else{
-          $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
-          sheckStatus += 1;
+          checkStatus += 1;
+
+        }else if(flag2 && checkSecond < 1){
+            checkSecond = 1;
+            $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
+            checkStatus += 1;
         }
-        if (sheckStatus === 2){
+        if (checkStatus === 2){
             // TIMEOUT BEFORE RUN GAME
             window.setTimeout(startGameAfterCheck,2000);
         }
@@ -80,6 +88,11 @@ $(function(){
           dialogStart.dialog( "close" );
           dialogConnect.dialog( "close" );
           $('#startGame').trigger('click');
+          checkStatus = 0;
+          doubleCheckPrevent = 0;
+          $('#getID').fadeOut('slow');
+          $('#connectToID').fadeOut('slow');
+          //$('.readyPlay').fadeIn('fast');
       }
 
       var myPeer; // peer object
@@ -95,54 +108,85 @@ $(function(){
       var keepWidth;
       // click event listener - click will create new peer (host)!
       $('#getID').on('click', function(){
-        $('#load-icon').removeAttr('hidden');
-        // new host-peer
-        myPeer = new Peer({key:'9l97dfmlbygy14i', debug: 3});
-        // Here we are create new ID of the connection (our host)
-        myPeer.on('open', function(id) {
-            console.log('My peer ID is: ' + id);
-            $('#code').text(id);
-            dialogStart.dialog( "open" );
-            $('#load-icon').attr('hidden','hidden');
-        });
-        //  IMPORTANT: Here we are deal with incoming connection
-        //             from remote peer (guest)!!!
-        myPeer.on('connection', function(connection) {
-          $('#dialog-start').find('.load-icon-big').last()
-          .html('<span>Connection established.<br/>To start game click button below</span>');
-          if (doubleCheckPrevent === 0){
-            $('.ui-dialog-buttonset').remove();
-            $('#dialog-start').append('<div class="ui-dialog-buttonset">'+
-            '<button type="button" class="ui-button ui-corner-all '+
-            'ui-widget readyPlay">Start game</button></div>');
-            appendStatus('#dialog-start');
-            $('.readyPlay').on('click', function(){
-              $(this).fadeOut('fast');
-              conn.send({type:'Ready'});
-              appendStatus(0, 1);
-            });
-            doubleCheckPrevent = 1;
-          }
-          // IMPORTANT to handle recieved connection
-          // after this assignment we can use .send() method for our HOST!
-          // conn.send(our message);
-          conn = connection; //can use .send() method for our HOST!
-          // Here set listener for incoming messages
-          conn.on('data', function(data){
-            if (data.type==='moveBall'){
-              OpponentKeepY = data.posOpponentY;
-              OpponentKeepX = data.posOpponentX;
-            }else if(data.type==='Ready'){
-              appendStatus(0, 0);
-            }else{
-              console.log('Recieved - ' + data);
-            }
+        if(!isGameStarted){//turning off the new game button
+          $('#load-icon').removeAttr('hidden');
+          // new host-peer
+          myPeer = new Peer({key:'9l97dfmlbygy14i', debug: 3});
+          // Here we are create new ID of the connection (our host)
+          myPeer.on('open', function(id) {
+              console.log('My peer ID is: ' + id);
+              $('#code').text(id);
+              dialogStart.dialog( "open" );
+              $('#load-icon').attr('hidden','hidden');
           });
-        });//P2P FUNCTION
-        User = $('#goalkeeperLeft');
-        Opponent = $('#goalkeeperRight');
-        initPlayer();
+          //  IMPORTANT: Here we are deal with incoming connection
+          //             from remote peer (guest)!!!
+          myPeer.on('connection', function(connection) {
+
+            // if check unautorised connection HERE MUST BE
+
+
+            $('#dialog-start').find('.load-icon-big').last()
+            .html('<span>Connection established.<br/>To start game click button below</span>');
+            if (doubleCheckPrevent === 0){
+              $('.ui-dialog-buttonset').remove();
+              $('#dialog-start').append('<div class="ui-dialog-buttonset">'+
+              '<button type="button" class="ui-button ui-corner-all '+
+              'ui-widget readyPlay">Start game</button></div>');
+              appendStatus('#dialog-start');
+              $('.readyPlay').on('click', function(){
+                //$(this).fadeOut('fast');
+                conn.send({type:'Ready'});
+                conn.send('******READY SENT');
+                console.log('click click event');
+
+              });
+              doubleCheckPrevent = 1;
+            }
+            // IMPORTANT to handle recieved connection
+            // after this assignment we can use .send() method for our HOST!
+            // conn.send(our message);
+            conn = connection; //can use .send() method for our HOST!
+            // Here set listener for incoming messages
+            conn.on('data', function(data){
+              if (data.type==='moveBall'){
+                OpponentKeepY = data.posOpponentY;
+                OpponentKeepX = data.posOpponentX;
+              }else if(data.type==='Ready'){
+                appendStatus(0, 0, 1);
+                conn.send({type:'ReadyAnswer'});
+              }else if(data.type==='ReadyAnswer'){
+                appendStatus(0, 1);
+              }else if (data.type==='chat') {
+                showInChatScreen(true, data.msg);
+              }else if(data.type === 'restart'){
+                if(data.isRestartAnswer === true){
+                  overlayShowHide(false);
+                  $('#startGame').text('Send request to play again');
+                  startGame();
+                }else if (data.isRestartAnswer === false){
+                  $('#startGame').on('click', function(){
+                    $('#startGame').text('Sending...');
+                    conn.send({type:'restart'});
+                    $('#startGame').off('click');
+                  });
+                  $('#startGame').text('Send request to play again');
+                  alert('Your opponent denied your proposal');
+                } else {
+                  restartRequest();
+                }
+              }else{
+                console.log('Recieved - ' + data);
+              }
+            });
+          });//P2P FUNCTION
+          User = $('#goalkeeperLeft');
+          Opponent = $('#goalkeeperRight');
+          initPlayer();
+        }
     });
+
+
     $('#connectToID').on('click', function(){
         dialogConnect.dialog( "open" );
     });
@@ -166,6 +210,7 @@ $(function(){
       $('#startGame').trigger('click');
       // if connection established - send greeting
       conn.on('open', function(id) {
+
             $('#dialog-connect').find('.load-icon-big').last()
             .html('<span>Connection established.<br/>To start game click button below</span>');
             if (doubleCheckPrevent === 0){
@@ -175,14 +220,17 @@ $(function(){
               'ui-widget readyPlay">Start game</button></div>');
               appendStatus('#dialog-connect');
               $('.readyPlay').on('click', function(){
-                $(this).fadeOut('fast');
-                appendStatus(0, 0);
+                //$(this).fadeOut('fast');
                 conn.send({type:'Ready'});
+                conn.send('******READY SENT');
+                console.log('click click event');
+                //appendStatus(0, 0);
               });
               doubleCheckPrevent = 1;
             }
 
       });
+
       myPeer.on('error', function(err) {
             let error = err.type;
             if (error === 'peer-unavailable'){
@@ -195,80 +243,116 @@ $(function(){
             //dialogConnect.dialog( "option", "buttons.Ready to game" );
             console.log('---- ' + error);
       });
-      // Here we listening for incoming messages
+
+      // LISTETING FOR INCOMING DATA
       conn.on('data', function(data){
-        // MOVE BALL SENDING COORDINATES
         if (data.type==='moveBall'){
           moveBallData(data.posX, data.posY);
           Opponent.attr('x', data.posOpponentX);
           Opponent.attr('y', data.posOpponentY);
 
         }else if(data.type==='goal'){
+            $('#goal').fadeIn('slow');
+            showGoal();
             let score = $(data.gate).text();
-            if (parseInt(score)){
+             if (parseInt(score)){
                 $(data.gate).text(parseInt(score) + 1);
             } else {
                 $(data.gate).text('1');
             }
         }else if(data.type==='Ready'){
             appendStatus(0, 1);
-        } else{
-            console.log('Recieved - ' + data);
+            conn.send({type:'ReadyAnswer'});
+        }else if(data.type==='ReadyAnswer'){
+            appendStatus(0, 0, 1);
+        }else if(data.type === 'restart'){
+          if (data.isRestartAnswer === true){
+            overlayShowHide(false);
+            $('#startGame').text('Send request to play again');
+            startGame();
+          } else if(data.isRestartAnswer === false){
+            $('#startGame').on('click', function(){
+              $('#startGame').text('Sending...');
+              conn.send({type:'restart'});
+              $('#startGame').off('click');
+            });
+            $('#startGame').text('Send request to play again');
+            alert('Your opponent denied your proposal');
+          } else {
+            restartRequest();
+          }
+        } else if(data.type === 'chat'){
+            showInChatScreen(true, data.msg);
+        } else {
+          console.log('received undefined: '+ data);
         }
       });
     } // END CONNECT FUNC
 
     // Send message function
-    $('#sendMessage').on('click', function(){
-        // here conn - our HOST or GUEST connection
-        conn.send(prompt('Enter your message: '));
-    });
 
-// ************** GAME ***********************
+      $('#chat-sent-message').on('keypress', function(e){
+          if (e.which === 13){
+            e.preventDefault();
+            if ($(e.target).val() != ''){
+              sendMessage($(e.target).val());
+              $(e.target).val('');
+            } else{
+              showInChatScreen('error', 'Your message can\'t be empty!');
+            }
+          }
+      });
+      $('#send').on('click', function(){
+        let text = $('#chat-sent-message').val();
+        if (text != ''){
+          sendMessage(text);
+          $('#chat-sent-message').val('');
+        } else{
+          showInChatScreen('error', 'Your message can\'t be empty!');
+        }
+      });
+
+function sendMessage(message){
+  try {
+    conn.send({type:'chat', msg:message});
+    showInChatScreen(false, message);
+  }catch(err) {
+    showInChatScreen('error', 'You need to establish connection first!');
+}
+
+}
+
+///   message render function
+function showInChatScreen(isReceived, message){
+  let chatScreen = $('#chatScreen')
+  if(isReceived===true){
+    chatScreen.append('<div><span class="chat-opponent">Opponent: </span>' + message + '</div>');
+  } else if (isReceived===false){
+    chatScreen.append('<div><span class="chat-you">You: </span>' + message + '</div>');
+  } else {
+    chatScreen.append('<div class="'+isReceived+'"><span class="'+isReceived+'">' + isReceived +': </span>' + message + '</div>');
+  }
+  autoScroll();
+}
+// scroll to  last message
+function autoScroll(){
+  var height = 0;
+  $('#chatScreen div').each(function(i, value){
+      height += parseInt($(this).height());
+  });
+  height += '';
+  $('#chatScreen').animate({scrollTop: height});
+}
+// destroy connection
+$('#destroy').on('click', function(){
+  if(typeof myPeer === 'object'){
+    myPeer.destroy();
+  }
+  location.reload();
+});
 
 
-/*
-резерваная копия function keyDownHandler(e){
-    //e.preventDefault();
-    //if (!User){
-      //alert('You need to create or join game first!');
-      //return;
-    //}
-
-      let replacement = keepY;
-
-    if(e.keyCode === 38){ // up
-      //надо заменитть на доступ к значению по оси Х
-      //по отношению к вратарю
-      if( replacement > upperLimit){
-        replacement-=5;
-        keeper.attr('y',replacement);
-      }
-       //$(User).attr('y',replacement);
-      //функция передающая перемещиение в чат
-      //функция задающая перемещение вратаря
-    }else if(e.keyCode === 40){ // down
-      //let replacement = 0;
-      if( lowerLimit > replacement){
-
-        replacement+=5;
-        keeper.attr('y',replacement);
-      }//else do nothing
-      //keeper.attr('y',replacement);
-      //функция передающая перемещиение в чат
-      //функция задающая перемещение вратаря
-    }
-
-  }*/
-  /*function sendMovement(position){
-      conn.send({type: 'movement', pos: position});
-  };
-
-  function moveOpponent(posY){
-      $(Opponent).attr('y',posY);
-  };
-*/
-//я изменил только ниже!!!!!!!!!!!!!!!!!!!!!!!
+// ************** GAME PHISICS ***********************
 
 //
 function initPlayer(){
@@ -287,8 +371,8 @@ var fieldY = +(field.attr('y'));
 var ballRadius = +(ball.attr('r'));
 var x = ball.attr('cx')-10;
 var y = ball.attr('cy')-10;
-  var dx = 1;
-  var dy = -1;
+var dx = 1;
+var dy = -1;
 
 //This function is for second player just to move ball after
 //  receiving of coordinates
@@ -344,29 +428,19 @@ function collapsBallKeeper(leftSide, rightSide, flag){
   var topLimit = 68;  //goalkeeper move limits
   var bottomLimit = 22 + Height; //goalkeeper move limits
   var upPressed = false;
-  var rightPressed = false; //-test button
   var downPressed = false;
-  var leftPressed = false;//-test button
-  var leftCounter = goalCounter(); // who missed the goal
-  var rightCounter = goalCounter();// who missed the goal
+  var currentLeftCounter = 0; //left keeper goal counters
+  var currentRightCounter = 0;
 
 //event below listens to pushing a button
  $(document).on('keydown', function(e){
-  e.preventDefault();
     if(e.keyCode === 38){
+      e.preventDefault();
       upPressed =  true;
     }else if(e.keyCode === 40){ // down
       //let replacement = 0;
+      e.preventDefault();
       downPressed = true;
-    }
-    // beneath - just for test
-    else if(e.keyCode === 39){ // down
-      //let replacement = 0;
-      rightPressed = true;
-    }
-    else if(e.keyCode === 37){ // down
-      //let replacement = 0;
-      leftPressed = true;
     }
   });
 
@@ -376,17 +450,7 @@ function collapsBallKeeper(leftSide, rightSide, flag){
     if(e.keyCode === 38){
       upPressed =  false;
     }else if(e.keyCode === 40){ // down
-      //let replacement = 0;
       downPressed = false;
-    }
-    // beneath - just for test
-    else if(e.keyCode === 39){ // down
-      //let replacement = 0;
-      rightPressed = false;
-    }
-    else if(e.keyCode === 37){ // down
-      //let replacement = 0;
-      leftPressed = false;
     }
   });
 
@@ -397,27 +461,21 @@ function collapsBallKeeper(leftSide, rightSide, flag){
         } else if(downPressed && bottomLimit > UserKeepY){
           User.attr('y', UserKeepY+=2);
         }
-      //conn.send({type:'moveBall', posOpponentX: UserKeepX, posOpponentY: UserKeepY});
   }
-  // function moveTESTKeeper(){
-  //       if(leftPressed && OpponentKeepY > topLimit){
-  //         Opponent.attr('y', OpponentKeepY-=2);
-  //       } else if(rightPressed && bottomLimit > OpponentKeepY){
-  //         Opponent.attr('y', OpponentKeepY+=2);
-  //       }
-  // }
+
   //defines whether out or goal happened
   function isBallOutOrGoal(){
     if( (180 <= y && y <= 330) && ( x ===65 || x === fieldX+ Width)){
-         console.log('GOAL!');
+         $('#goal').fadeIn('slow');
+         showGoal();
           if (x===65){
-            countR = rightCounter();
-            $('#rightGoalPlate').text(countR);
+            ++currentLeftCounter;
+            $('#rightGoalPlate').text(currentLeftCounter);
             conn.send({type:"goal", gate: '#rightGoalPlate'});
           } else if (x===fieldX
             + Width){
-            countL = leftCounter();
-            $('#leftGoalPlate').text(countL);
+            ++currentRightCounter;
+            $('#leftGoalPlate').text(currentRightCounter);
             conn.send({type:"goal", gate: '#leftGoalPlate'});
           }
           ball.attr('cx', x = 395);
@@ -431,33 +489,45 @@ function collapsBallKeeper(leftSide, rightSide, flag){
           ball.attr('cy', y = 390);
           dx = -dx;
       }
-  }
-  function goalCounter(){
-    let currentCounter = 1;
-    return function(){
-      return currentCounter++;
     }
-  };
+// show goal function
+function showGoal(){
+  let w = 55;
+  let max = 100;
+  let goal = setInterval(function(){
+      if(w != max){
+        $('#goal p').css('font-size', w++);
+      } else {
+        clearInterval(goal);
+        $('#goal').fadeOut('fast');
+      }
+  }, 20);
+}
+
+
+// ************** SERVICE PART ***********************
 
 //this part sets the game up
-var countL = 0; //-goal counter for left player
-var countR = 0; //-goal counter for right player
 var isGameStarted = false;
-$('#startGame').on('click',function startGame(){
+const startGameButton = $('#startGame');
+const gameOverWindow = $('#gameOverWindow');
+overlayShowHide(false);
+
+$('#startGame').on('click',startGame);
+
+  function startGame(){
   isGameStarted = true;
   if (isGameStarted){       //turns the startGame button off
-    $(this).off('click');
+    $('#startGame').off('click');
+    overlayShowHide(false);
   }
-  countL = goalCounter(); //-goal counter for left player
-  countR = goalCounter();
-  leftCounter = goalCounter();
-  rightCounter = goalCounter();
-  //countL = leftCounter.currentCounter;
-  //countR = rightCounter.currentCounter;
+  $('#leftGoalPlate').text(0); //-goal counter for left player
+  $('#rightGoalPlate').text(0);
+  currentLeftCounter = 0;
+  currentRightCounter = 0;
   var gameInterval = setInterval(function(){
     moveKeeper();
-    //moveTESTKeeper();
-
+    //check who has started games
     if (User[0].id === 'goalkeeperLeft'){
         isBallOutOrGoal();
         moveBall();
@@ -466,15 +536,39 @@ $('#startGame').on('click',function startGame(){
     } else {
         conn.send({type:'moveBall', posOpponentX: UserKeepX, posOpponentY: UserKeepY});
     }
-    if (countL >=3 || countR >= 3){
+    if ($('#leftGoalPlate').text() >= 3 || $('#rightGoalPlate').text() >= 3){
       clearInterval(gameInterval);
-      alert('game over');
       isGameStarted = false;
+      overlayShowHide(true);
       if (!isGameStarted){     //turns the startGame button on
-        $('#startGame').on('click', startGame);
+        $('#startGame').on('click', function(){
+            conn.send({type:'restart'});
+            $('#startGame').text('Sending...');
+            $('#startGame').off('click');
+            //overlayShowHide(false);
+        })
+
       }
     }
    }, 10);
-})
+}
+
+function overlayShowHide(isShow){
+    if (isShow){
+      $('#gameOverLayer').fadeIn();
+    }else{
+      $('#gameOverLayer').fadeOut();
+    }
+}
+
+function restartRequest(){
+  if(confirm('Do you want to play again?')){
+    overlayShowHide(false);
+    conn.send({type:'restart', isRestartAnswer:true});
+    startGame();
+  } else {
+    conn.send({type:'restart', isRestartAnswer: false});
+  }
+}
 
 }); // ready brackets
