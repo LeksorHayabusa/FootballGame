@@ -1,4 +1,3 @@
-<<<<<<< HEAD:fbgame.beta.js
 'use strict';
 $(function(){
 
@@ -1148,4 +1147,4 @@ function restartRequest(){
 }
 
 }); // ready brackets
->>>>>>> dcea176ef926ba08b231c3d9737fe9404f736e52:fbgame.beta.js
+
