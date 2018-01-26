@@ -59,21 +59,25 @@ $(function(){
         window.clearTimeout();
       });
       // Player CHECK STATUS FUNC
-      var sheckStatus = 0;
+      var checkStatus = 0;
+      var checkFirst = 0;
+      var checkSecond = 0;
       function appendStatus(dialog, flag1, flag2){
         if (dialog){
           $(dialog).append("<div id='startButton' style='display:flex; justify-content:space-between; margin-top:10px;'>"+
             "<div class='p1'>Player 1 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div>"+
             "<div class='p2'>Player 2 ready:<span><i class='fa fa-spinner fa-pulse fa-lg fa-fw'></i></span></div></div>");
-        }else if (flag1){
+        }else if (flag1 && checkFirst < 1){
+          checkFirst = 1;
           $('.p1 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
-          sheckStatus += 1;
+          checkStatus += 1;
 
-        }else{
+        }else if(flag2 && checkSecond < 1){
+            checkSecond = 1;
             $('.p2 > span').html('<i class="fa fa-check" aria-hidden="true"></i>');
-            sheckStatus += 1;
+            checkStatus += 1;
         }
-        if (sheckStatus === 2){
+        if (checkStatus === 2){
             // TIMEOUT BEFORE RUN GAME
             window.setTimeout(startGameAfterCheck,2000);
         }
@@ -84,7 +88,7 @@ $(function(){
           dialogStart.dialog( "close" );
           dialogConnect.dialog( "close" );
           $('#startGame').trigger('click');
-          sheckStatus = 0;
+          checkStatus = 0;
           doubleCheckPrevent = 0;
           $('#getID').fadeOut('slow');
           $('#connectToID').fadeOut('slow');
@@ -133,6 +137,8 @@ $(function(){
               $('.readyPlay').on('click', function(){
                 //$(this).fadeOut('fast');
                 conn.send({type:'Ready'});
+                conn.send('******READY SENT');
+                console.log('click click event');
 
               });
               doubleCheckPrevent = 1;
@@ -147,7 +153,7 @@ $(function(){
                 OpponentKeepY = data.posOpponentY;
                 OpponentKeepX = data.posOpponentX;
               }else if(data.type==='Ready'){
-                appendStatus(0, 0);
+                appendStatus(0, 0, 1);
                 conn.send({type:'ReadyAnswer'});
               }else if(data.type==='ReadyAnswer'){
                 appendStatus(0, 1);
@@ -156,12 +162,15 @@ $(function(){
               }else if(data.type === 'restart'){
                 if(data.isRestartAnswer === true){
                   overlayShowHide(false);
+                  $('#startGame').text('Send request to play again');
                   startGame();
                 }else if (data.isRestartAnswer === false){
                   $('#startGame').on('click', function(){
+                    $('#startGame').text('Sending...');
                     conn.send({type:'restart'});
                     $('#startGame').off('click');
                   });
+                  $('#startGame').text('Send request to play again');
                   alert('Your opponent denied your proposal');
                 } else {
                   restartRequest();
@@ -213,6 +222,8 @@ $(function(){
               $('.readyPlay').on('click', function(){
                 //$(this).fadeOut('fast');
                 conn.send({type:'Ready'});
+                conn.send('******READY SENT');
+                console.log('click click event');
                 //appendStatus(0, 0);
               });
               doubleCheckPrevent = 1;
@@ -253,16 +264,19 @@ $(function(){
             appendStatus(0, 1);
             conn.send({type:'ReadyAnswer'});
         }else if(data.type==='ReadyAnswer'){
-            appendStatus(0, 0);
+            appendStatus(0, 0, 1);
         }else if(data.type === 'restart'){
           if (data.isRestartAnswer === true){
             overlayShowHide(false);
+            $('#startGame').text('Send request to play again');
             startGame();
           } else if(data.isRestartAnswer === false){
             $('#startGame').on('click', function(){
+              $('#startGame').text('Sending...');
               conn.send({type:'restart'});
               $('#startGame').off('click');
             });
+            $('#startGame').text('Send request to play again');
             alert('Your opponent denied your proposal');
           } else {
             restartRequest();
@@ -529,6 +543,7 @@ $('#startGame').on('click',startGame);
       if (!isGameStarted){     //turns the startGame button on
         $('#startGame').on('click', function(){
             conn.send({type:'restart'});
+            $('#startGame').text('Sending...');
             $('#startGame').off('click');
             //overlayShowHide(false);
         })
