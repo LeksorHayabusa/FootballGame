@@ -111,7 +111,7 @@ $(function(){
         if(!isGameStarted){//turning off the new game button
           $('#load-icon').removeAttr('hidden');
           // new host-peer
-          myPeer = new Peer({key:'9l97dfmlbygy14i', debug: 3});
+          myPeer = new Peer({key: "peerjs", host: 'udacitypeerjs.herokuapp.com', port:'443'});
           // Here we are create new ID of the connection (our host)
           myPeer.on('open', function(id) {
               console.log('My peer ID is: ' + id);
