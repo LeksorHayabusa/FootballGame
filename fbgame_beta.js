@@ -550,7 +550,7 @@ $('#startGame').on('click',startGame);
 
       }
     }
-   }, 5);
+   }, 10);
 }
 
 function overlayShowHide(isShow){
