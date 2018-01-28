@@ -371,8 +371,8 @@ var fieldY = +(field.attr('y'));
 var ballRadius = +(ball.attr('r'));
 var x = ball.attr('cx')-10;
 var y = ball.attr('cy')-10;
-var dx = 2;
-var dy = -2;
+var dx = 1;
+var dy = -1;
 
 //This function is for second player just to move ball after
 //  receiving of coordinates
@@ -550,7 +550,7 @@ $('#startGame').on('click',startGame);
 
       }
     }
-   }, 10);
+   }, 5);
 }
 
 function overlayShowHide(isShow){
