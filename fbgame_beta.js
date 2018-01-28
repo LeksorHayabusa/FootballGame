@@ -198,7 +198,7 @@ $(function(){
       Opponent = $('#goalkeeperLeft');
       initPlayer();
       // new guest-peer
-      myPeer = new Peer({key:'9l97dfmlbygy14i', debug: 3});
+          myPeer = new Peer({key: "peerjs", host: 'udacitypeerjs.herokuapp.com', port:'443'});
       // take host-peer ID from input to create connection
       let otherPIR = $('#insert-code').val();
       // establish connection with host-peer
